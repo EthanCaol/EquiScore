@@ -100,7 +100,7 @@ class MultiHeadAttentionLayer(nn.Module):
         # attention dropout for control overfitting
         full_g.edata['score'] = self.attn_dropout(full_g.edata['score'])
         #feature update
-        full_g.send_and_recv(eids, fn.src_mul_edge('V_h', 'score', 'V_h'), fn.sum('V_h', 'wV'))
+        full_g.send_and_recv(eids, fn.u_mul_e('V_h', 'score', 'V_h'), fn.sum('V_h', 'wV'))
 
 
 

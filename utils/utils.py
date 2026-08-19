@@ -126,8 +126,8 @@ def get_metrics(train_true,train_pred):
         metrics
     """
     try:
-        train_pred = np.concatenate(np.array(train_pred,dtype=object), 0).astype(np.float)
-        train_true = np.concatenate(np.array(train_true,dtype=object), 0).astype(np.long)
+        train_pred = np.concatenate(np.array(train_pred,dtype=object), 0).astype(float)
+        train_true = np.concatenate(np.array(train_true,dtype=object), 0).astype(np.int64)
     except:
         pass
     train_pred_label = np.where(train_pred > 0.5,1,0).astype(np.long)
