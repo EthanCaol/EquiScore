@@ -42,11 +42,14 @@ def extract(ligand, pdb,key):
     fn = "BS_tmp_"+str(key)+".pdb"
     io.save(fn, ResidueSelect())
     try:
-        m2 = Chem.MolFromPDBFile(fn)
+        try:
+            m2 = Chem.MolFromPDBFile(fn)
+        except Exception:
+            m2 = None
         # may contain metal atom, causing MolFromPDBFile return None
         if m2 is None:
             print("first read PDB fail",fn)
-            # copy file to tmp dir 
+            # copy file to tmp dir
             remove_zn_dir="./docker_result_remove_ZN"
             if not os.path.exists(remove_zn_dir):
                 os.mkdir(remove_zn_dir)
@@ -57,12 +60,22 @@ def extract(ligand, pdb,key):
             cmd=f"sed -e '/ZN/d'  {fn}  > {fn_remove_zn}"
             os.system(cmd)
             print("delete metal atom and get new pdb file",fn_remove_zn)
-            m2 = Chem.MolFromPDBFile(fn_remove_zn)
+            try:
+                m2 = Chem.MolFromPDBFile(fn_remove_zn)
+            except Exception:
+                m2 = None
         else:
             os.system("rm -f " + fn)
+        # last resort: valence errors (e.g. close salt-bridge O) break sanitize
+        # -> read unsanitized (pocket mol only needs coords + adjacency downstream)
+        if m2 is None:
+            try:
+                m2 = Chem.MolFromPDBFile(fn, sanitize=False)
+            except Exception:
+                m2 = None
     except:
         print("Read PDB fail for other unknow reason",fn)
-    
+
     return m2
 
 def preprocessor(docking_result_sdf_fn,origin_recptor_pdb,data_dir):
